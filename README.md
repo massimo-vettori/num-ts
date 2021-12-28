@@ -7,16 +7,16 @@
 <br>
 
 # 🚥 Roadmap
-- [ ] Generic abstract `NDArray` class
-   - [ ] Shape interface
-   - [ ] Abstract algebra operations
+- [x] Generic abstract `NDArray` class
+   - [x] Shape interface
+   - [x] Abstract algebra operations
    - [ ] Shape manipulation methods
 
 <br>
 
-- [ ] Vector class
-   - [ ] Operations between Vectors
-   - [ ] Operations between Vectors and Scalars
+- [x] Vector class
+   - [x] Operations between Vectors
+   - [x] Operations between Vectors and Scalars
    - [ ] Operations between Vectors and other NDArrays
 
 <br>
