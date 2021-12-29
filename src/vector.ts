@@ -1,6 +1,7 @@
 import { NDArray, Scalar } from "./ndarray.ts";
+import { Matrix } from "./matrix.ts";
 
-type VectorLike = Scalar[] | ArrayLike<Scalar> | Float32Array | Vector;
+export type VectorLike = Scalar[] | Vector;
 
 export class Vector extends NDArray<Vector, Scalar> {
   constructor(size: number) {
@@ -63,6 +64,14 @@ export class Vector extends NDArray<Vector, Scalar> {
     let out = 0;
     for (let i = 0; i < this.length; i++) out += this[i] * arg[i];
     return out;
+  }
+
+  public toRowMatrix(): Matrix {
+    return Matrix.createRow(this);
+  }
+
+  public toColumnMatrix(): Matrix {
+    return Matrix.createColumn(this);
   }
 
   ///// ///// ///// ///// /////
