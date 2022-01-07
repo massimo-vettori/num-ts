@@ -1,5 +1,5 @@
 <p align="center">
-  <h1>🦕 linalg</h1>
+  <h1>🦕 numts</h1>
    <img src="./__repo__/banner.jpg">
   <div align="center"><em>Simple Linear Algebra library, written in TypeScript for Deno</em></div>
 </p>
