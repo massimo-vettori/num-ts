@@ -27,9 +27,9 @@
 
 <br>
 
-- [ ] **Tensor** class
-   - [ ] Operations between *Tensors*
-   - [ ] Operations between *Tensors* and *Scalars*
+- [x] **Tensor** class
+   - [x] Operations between *Tensors*
+   - [x] Operations between *Tensors* and *Scalars*
    - [ ] Operations between *Tensors* and other *NDArrays*
 
 

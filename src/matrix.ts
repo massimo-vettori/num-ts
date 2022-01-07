@@ -23,6 +23,16 @@ export class Matrix extends NDArray<Matrix, Vector> {
     return this[0].length;
   }
 
+  public get T(): Matrix {
+    const out = new Matrix(this.cols, this.rows);
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
+        out[j][i] = this[i][j];
+      }
+    }
+    return out;
+  }
+
   public add(arg: Matrix | Scalar): this {
     if (typeof arg === "number") {
       for (let i = 0; i < this.length; i++) this[i].add(arg);
@@ -156,5 +166,21 @@ export class Matrix extends NDArray<Matrix, Vector> {
     }
 
     return out;
+  }
+
+  public static values(rows: number, cols: number, value: Scalar): Matrix {
+    const out = new Matrix(rows, cols);
+    for (let i = 0; i < rows; i++) {
+      out[i].fill(value);
+    }
+    return out;
+  }
+
+  public static zeros(rows: number, cols: number): Matrix {
+    return new Matrix(rows, cols);
+  }
+
+  public static ones(rows: number, cols: number): Matrix {
+    return Matrix.values(rows, cols, 1);
   }
 }

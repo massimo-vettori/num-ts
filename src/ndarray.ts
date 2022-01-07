@@ -19,4 +19,5 @@ export abstract class NDArray<
 
   public dot?(arg: ContainerType | SubType): ContainerType | SubType;
   public convolve?(kernel: ContainerType): ContainerType;
+  public transpose?(): ContainerType;
 }
