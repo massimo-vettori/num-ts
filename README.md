@@ -1,6 +1,6 @@
 <p align="center">
-  <h1>🦕 numts</h1>
-   <img src="./__repo__/banner.jpg">
+  <h1>🦕 NumTS</h1>
+   <img src="./__repo__/banner.png">
   <div align="center"><em>Simple Linear Algebra library, written in TypeScript for Deno</em></div>
 </p>
 
