@@ -183,4 +183,13 @@ export class Matrix extends NDArray<Matrix, Vector> {
   public static ones(rows: number, cols: number): Matrix {
     return Matrix.values(rows, cols, 1);
   }
+
+  public static rand(
+    rows: number,
+    cols: number,
+    min = -0.1,
+    max = 0.1,
+  ): Matrix {
+    return new Matrix(rows, cols).rand(min, max);
+  }
 }

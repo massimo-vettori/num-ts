@@ -5,10 +5,9 @@ import { Vector } from "./vector.ts";
 export type TensorLike = Tensor | number[][][] | Matrix[];
 
 export class Tensor extends NDArray<Tensor, Matrix> {
-
   constructor(rows: number, cols: number, depth: number) {
     super(depth);
-    for (let i=0; i<this.length; i++) {
+    for (let i = 0; i < this.length; i++) {
       this[i] = new Matrix(rows, cols);
     }
   }
@@ -118,23 +117,23 @@ export class Tensor extends NDArray<Tensor, Matrix> {
 
     const out = new Tensor(m[0].length, m[0][0].length, m.length);
 
-    for (let z=0; z<out.depth; ++z) {
-      for (let y=0; y<out.rows; ++y) {
-        for (let x=0; x<out.cols; ++x) {
-          
-          for (let kz=0; kz<kernel.length; ++kz) {
-            for (let ky=0; ky<kernel[0].length; ++ky) {
-              for (let kx=0; kx<kernel[0][0].length; ++kx) {
+    for (let z = 0; z < out.depth; ++z) {
+      for (let y = 0; y < out.rows; ++y) {
+        for (let x = 0; x < out.cols; ++x) {
+          for (let kz = 0; kz < kernel.length; ++kz) {
+            for (let ky = 0; ky < kernel[0].length; ++ky) {
+              for (let kx = 0; kx < kernel[0][0].length; ++kx) {
                 const mx = x + kx - padw;
                 const my = y + ky - padh;
 
-                if (mx >= 0 && mx < m[0].length && my >= 0 && my < m[0][0].length) {
+                if (
+                  mx >= 0 && mx < m[0].length && my >= 0 && my < m[0][0].length
+                ) {
                   out[z][y][x] += m[z][my][mx] * kernel[kz][ky][kx];
                 }
               }
             }
           }
-
         }
       }
     }
@@ -142,7 +141,12 @@ export class Tensor extends NDArray<Tensor, Matrix> {
     return out;
   }
 
-  public static values(rows: number, cols: number, depth: number, value: Scalar): Tensor {
+  public static values(
+    rows: number,
+    cols: number,
+    depth: number,
+    value: Scalar,
+  ): Tensor {
     const out = new Tensor(rows, cols, depth);
 
     for (let i = 0; i < out.length; i++) {
@@ -162,5 +166,15 @@ export class Tensor extends NDArray<Tensor, Matrix> {
 
   public static ones(rows: number, cols: number, depth: number): Tensor {
     return Tensor.values(rows, cols, depth, 1);
+  }
+
+  public static rand(
+    rows: number,
+    cols: number,
+    depth: number,
+    min = -0.1,
+    max = 0.1,
+  ): Tensor {
+    return new Tensor(rows, cols, depth).rand(min, max);
   }
 }
