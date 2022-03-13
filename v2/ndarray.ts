@@ -14,6 +14,7 @@ export interface NDArray {
   convolve?(kernel: NDArrayLike | NDArray): NDArray;
 
   clone(): NDArray;
+  copy(other: NDArrayLike | NDArray): this;
   rand(min: Scalar, max: Scalar): this;
   all(value: Scalar): this;
 }

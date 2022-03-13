@@ -58,6 +58,11 @@ export class Vector extends Array<Scalar> implements NDArray {
     return out;
   }
 
+  copy(other: VectorLike | Vector): this {
+    for (let i = 0; i < this.length; i++) this[i] = other[i];
+    return this;
+  }
+
   rand(min = -0.1, max = 0.1): this {
     for (let i = 0; i < this.length; i++) {
       this[i] = Math.random() * (max - min) + min;
@@ -94,5 +99,9 @@ export class Vector extends Array<Scalar> implements NDArray {
 
   static rand(size: number, min = -0.1, max = 0.1) {
     return new Vector(size).rand(min, max);
+  }
+
+  static from(raw: VectorLike | Vector): Vector {
+    return new Vector(raw.length).copy(raw);
   }
 }

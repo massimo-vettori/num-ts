@@ -10,7 +10,7 @@ export class Matrix extends Array<Vector> implements NDArray {
   get cols(): number {
     return this[0].length;
   }
-  
+
   get shape(): number[] {
     return [this.rows, this.cols];
   }
@@ -64,6 +64,11 @@ export class Matrix extends Array<Vector> implements NDArray {
     const out = new Matrix(this.rows, this.cols);
     for (let i = 0; i < this.rows; i++) out[i] = this[i].clone();
     return out;
+  }
+
+  copy(other: MatrixLike | Matrix): this {
+    for (let i = 0; i < this.rows; i++) this[i].copy(other[i]);
+    return this;
   }
 
   rand(min = -0.1, max = 0.1): this {
@@ -134,6 +139,10 @@ export class Matrix extends Array<Vector> implements NDArray {
   }
 
   ///////////////////////////////////////////////////////////////////
+
+  static from(raw: MatrixLike | Matrix): Matrix {
+    return new Matrix(raw.length, raw[0].length).copy(raw);
+  }
 
   static zeros(rows: number, cols: number): Matrix {
     return new Matrix(rows, cols);
