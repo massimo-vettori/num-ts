@@ -1,174 +1,114 @@
-import { NDArray, Scalar } from "./ndarray.ts";
+import { Scalar, TensorLike } from "./types.ts";
+import { NDArray } from "./ndarray.ts";
 import { Matrix } from "./matrix.ts";
-import { Vector } from "./vector.ts";
 
-export type TensorLike = Tensor | number[][][] | Matrix[];
-
-export class Tensor extends NDArray<Tensor, Matrix> {
-  constructor(rows: number, cols: number, depth: number) {
-    super(depth);
-    for (let i = 0; i < this.length; i++) {
-      this[i] = new Matrix(rows, cols);
-    }
+export class Tensor extends Array<Matrix> implements NDArray {
+  get depth() {
+    return this.length;
   }
-
-  public get shape(): number[] {
-    return [this.rows, this.cols, this.depth];
-  }
-
-  public get rows(): number {
+  get rows() {
     return this[0].rows;
   }
-
-  public get cols(): number {
+  get cols() {
     return this[0].cols;
   }
 
-  public get depth(): number {
-    return this.length;
+  get shape() {
+    return [this.rows, this.cols, this.depth];
   }
 
-  public add(arg: Tensor | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) {
-        this[i].add(arg);
-      }
+  constructor(rows: number, cols: number, depth: number) {
+    super(depth);
+    for (let i = 0; i < depth; ++i) this[i] = new Matrix(rows, cols);
+  }
+
+  add(other: TensorLike | Tensor | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.depth; ++i) this[i].add(other[i]);
     } else {
-      for (let i = 0; i < this.length; i++) {
-        this[i].add(arg[i]);
-      }
+      for (let i = 0; i < this.depth; ++i) this[i].add(other);
     }
+
     return this;
   }
 
-  public sub(arg: Tensor | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) {
-        this[i].sub(arg);
-      }
+  sub(other: TensorLike | Tensor | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.depth; ++i) this[i].sub(other[i]);
     } else {
-      for (let i = 0; i < this.length; i++) {
-        this[i].sub(arg[i]);
-      }
+      for (let i = 0; i < this.depth; ++i) this[i].sub(other);
     }
+
     return this;
   }
 
-  public mul(arg: Tensor | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) {
-        this[i].mul(arg);
-      }
+  mul(other: TensorLike | Tensor | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.depth; ++i) this[i].mul(other[i]);
     } else {
-      for (let i = 0; i < this.length; i++) {
-        this[i].mul(arg[i]);
-      }
+      for (let i = 0; i < this.depth; ++i) this[i].mul(other);
     }
+
     return this;
   }
 
-  public div(arg: Tensor | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) {
-        this[i].div(arg);
-      }
+  div(other: TensorLike | Tensor | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.depth; ++i) this[i].div(other[i]);
     } else {
-      for (let i = 0; i < this.length; i++) {
-        this[i].div(arg[i]);
-      }
+      for (let i = 0; i < this.depth; ++i) this[i].div(other);
     }
+
     return this;
   }
 
-  public rand(min = -0.1, max = 0.1): this {
-    for (let i = 0; i < this.length; i++) {
-      this[i].rand(min, max);
-    }
-    return this;
-  }
-
-  public copy(): Tensor {
-    return Tensor.from(this);
-  }
-
-  public convolve(kernel: TensorLike): Tensor {
-    return Tensor.convolve(this, kernel);
-  }
-
-  ///// ///// ///// ///// /////
-
-  public static from(raw: TensorLike): Tensor {
-    const out = new Tensor(raw[0].length, raw[0][0].length, raw.length);
-
-    for (let i = 0; i < raw.length; i++) {
-      for (let j = 0; j < raw[i].length; j++) {
-        for (let k = 0; k < raw[i][j].length; k++) {
-          out[i][j][k] = raw[i][j][k];
-        }
-      }
-    }
-
+  clone(): Tensor {
+    const out = new Tensor(this.rows, this.cols, this.depth);
+    for (let i = 0; i < this.depth; ++i) out[i] = this[i].clone();
     return out;
   }
 
-  public static convolve(m: TensorLike, kernel: TensorLike): Tensor {
-    const padh = Math.floor(kernel[0].length / 2);
-    const padw = Math.floor(kernel[0][0].length / 2);
+  copy(other: Tensor | TensorLike): this {
+    for (let i = 0; i < this.depth; ++i) this[i].copy(other[i]);
+    return this;
+  }
 
-    const out = new Tensor(m[0].length, m[0][0].length, m.length);
+  all(value: Scalar): this {
+    for (let i = 0; i < this.depth; ++i) this[i].all(value);
+    return this;
+  }
 
-    for (let z = 0; z < out.depth; ++z) {
-      for (let y = 0; y < out.rows; ++y) {
-        for (let x = 0; x < out.cols; ++x) {
-          for (let kz = 0; kz < kernel.length; ++kz) {
-            for (let ky = 0; ky < kernel[0].length; ++ky) {
-              for (let kx = 0; kx < kernel[0][0].length; ++kx) {
-                const mx = x + kx - padw;
-                const my = y + ky - padh;
+  rand(min = -0.1, max = 0.1): this {
+    for (let i = 0; i < this.depth; ++i) this[i].rand(min, max);
+    return this;
+  }
 
-                if (
-                  mx >= 0 && mx < m[0].length && my >= 0 && my < m[0][0].length
-                ) {
-                  out[z][y][x] += m[z][my][mx] * kernel[kz][ky][kx];
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
+  convolve(kernel: Tensor | TensorLike): Tensor {
+    const out = new Tensor(this.rows, this.cols, this.depth);
+    for (let i = 0; i < this.depth; ++i) out[i] = this[i].convolve(kernel[i]);
     return out;
   }
 
-  public static values(
+  ////////////////////////////////////////////////////////////////////////////////
+
+  static zeros(rows: number, cols: number, depth: number): Tensor {
+    return new Tensor(rows, cols, depth);
+  }
+
+  static ones(rows: number, cols: number, depth: number): Tensor {
+    return Tensor.values(rows, cols, depth, 1);
+  }
+
+  static values(
     rows: number,
     cols: number,
     depth: number,
     value: Scalar,
   ): Tensor {
-    const out = new Tensor(rows, cols, depth);
-
-    for (let i = 0; i < out.length; i++) {
-      for (let j = 0; j < out[i].length; j++) {
-        for (let k = 0; k < out[i][j].length; k++) {
-          out[i][j][k] = value;
-        }
-      }
-    }
-
-    return out;
+    return new Tensor(rows, cols, depth).all(value);
   }
 
-  public static zeros(rows: number, cols: number, depth: number): Tensor {
-    return new Tensor(rows, cols, depth);
-  }
-
-  public static ones(rows: number, cols: number, depth: number): Tensor {
-    return Tensor.values(rows, cols, depth, 1);
-  }
-
-  public static rand(
+  static rand(
     rows: number,
     cols: number,
     depth: number,
@@ -176,5 +116,9 @@ export class Tensor extends NDArray<Tensor, Matrix> {
     max = 0.1,
   ): Tensor {
     return new Tensor(rows, cols, depth).rand(min, max);
+  }
+
+  static from(raw: TensorLike | Tensor): Tensor {
+    return new Tensor(raw[0].length, raw[0][0].length, raw.length).copy(raw);
   }
 }

@@ -1,23 +1,20 @@
-export type Scalar = number;
+import { NDArrayLike, Scalar } from "./types.ts";
 
-export abstract class NDArray<
-  ContainerType extends NDArray<ContainerType, SubType>,
-  SubType,
-> extends Array<SubType> {
-  constructor(size: number) {
-    super(size);
-  }
+export interface NDArray {
+  get shape(): number[];
 
-  public abstract get shape(): number[];
+  add(other: NDArrayLike | NDArray | Scalar): this;
+  sub(other: NDArrayLike | NDArray | Scalar): this;
+  mul(other: NDArrayLike | NDArray | Scalar): this;
+  div(other: NDArrayLike | NDArray | Scalar): this;
 
-  public abstract add(other: ContainerType | Scalar): this;
-  public abstract sub(other: ContainerType | Scalar): this;
-  public abstract mul(other: ContainerType | Scalar): this;
-  public abstract div(other: ContainerType | Scalar): this;
-  public abstract rand(min: Scalar, max: Scalar): this;
-  public abstract copy(): ContainerType;
+  dot?(other: NDArrayLike | NDArray): NDArray | Scalar;
+  transpose?(): NDArray;
+  reshape?(shape: number[]): NDArray;
+  convolve?(kernel: NDArrayLike | NDArray): NDArray;
 
-  public dot?(arg: ContainerType | SubType): ContainerType | SubType;
-  public convolve?(kernel: ContainerType): ContainerType;
-  public transpose?(): ContainerType;
+  clone(): NDArray;
+  copy(other: NDArrayLike | NDArray): this;
+  rand(min: Scalar, max: Scalar): this;
+  all(value: Scalar): this;
 }

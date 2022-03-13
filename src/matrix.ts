@@ -1,29 +1,122 @@
-import { NDArray, Scalar } from "./ndarray.ts";
-import { Vector, VectorLike } from "./vector.ts";
+import { MatrixLike, Scalar } from "./types.ts";
+import { NDArray } from "./ndarray.ts";
+import { Vector } from "./vector.ts";
 
-type MatrixLike = Vector[] | Matrix | number[][];
-
-export class Matrix extends NDArray<Matrix, Vector> {
-  constructor(rows: number, cols: number) {
-    super(rows);
-    for (let i = 0; i < rows; i++) {
-      this[i] = new Vector(cols);
-    }
-  }
-
-  public get shape(): number[] {
-    return [this.rows, this.cols];
-  }
-
-  public get rows(): number {
+export class Matrix extends Array<Vector> implements NDArray {
+  get rows(): number {
     return this.length;
   }
 
-  public get cols(): number {
+  get cols(): number {
     return this[0].length;
   }
 
-  public get T(): Matrix {
+  get shape(): number[] {
+    return [this.rows, this.cols];
+  }
+
+  constructor(rows: number, cols: number) {
+    super(rows);
+    for (let i = 0; i < rows; i++) this[i] = new Vector(cols);
+  }
+
+  add(other: MatrixLike | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.rows; i++) this[i].add(other[i]);
+    } else {
+      for (let i = 0; i < this.rows; i++) this[i].add(other);
+    }
+
+    return this;
+  }
+
+  sub(other: MatrixLike | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.rows; i++) this[i].sub(other[i]);
+    } else {
+      for (let i = 0; i < this.rows; i++) this[i].sub(other);
+    }
+
+    return this;
+  }
+
+  mul(other: MatrixLike | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.rows; i++) this[i].mul(other[i]);
+    } else {
+      for (let i = 0; i < this.rows; i++) this[i].mul(other);
+    }
+
+    return this;
+  }
+
+  div(other: MatrixLike | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.rows; i++) this[i].div(other[i]);
+    } else {
+      for (let i = 0; i < this.rows; i++) this[i].div(other);
+    }
+
+    return this;
+  }
+
+  clone(): Matrix {
+    const out = new Matrix(this.rows, this.cols);
+    for (let i = 0; i < this.rows; i++) out[i] = this[i].clone();
+    return out;
+  }
+
+  copy(other: MatrixLike): this {
+    for (let i = 0; i < this.rows; i++) this[i].copy(other[i]);
+    return this;
+  }
+
+  rand(min = -0.1, max = 0.1): this {
+    for (let i = 0; i < this.rows; i++) this[i].rand(min, max);
+    return this;
+  }
+
+  all(value: Scalar): this {
+    for (let i = 0; i < this.rows; i++) this[i].all(value);
+    return this;
+  }
+
+  row(index: number): Vector {
+    return this[index].clone();
+  }
+
+  col(index: number): Vector {
+    const out = new Vector(this.rows);
+    for (let i = 0; i < this.rows; i++) out[i] = this[i][index] || 0;
+    return out;
+  }
+
+  dot(other: MatrixLike): Matrix {
+    return Matrix.dot(this, other);
+  }
+
+  convolve(kernel: MatrixLike): Matrix {
+    const out = new Matrix(this.rows, this.cols);
+
+    const kr = kernel.length;
+    const kc = kernel[0].length;
+
+    const ph = Math.floor(kr / 2);
+    const pw = Math.floor(kc / 2);
+
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.cols; j++) {
+        for (let r = 0; r < kr; r++) {
+          for (let c = 0; c < kc; c++) {
+            out[i][j] += (this[i + r - ph][j + c - pw] * kernel[r][c]) || 0;
+          }
+        }
+      }
+    }
+    return out;
+  }
+
+  transpose(): Matrix {
     const out = new Matrix(this.cols, this.rows);
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.cols; j++) {
@@ -33,163 +126,39 @@ export class Matrix extends NDArray<Matrix, Vector> {
     return out;
   }
 
-  public add(arg: Matrix | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) this[i].add(arg);
-    } else {
-      for (let i = 0; i < this.length; i++) this[i].add(arg[i]);
-    }
+  ///////////////////////////////////////////////////////////////////
 
-    return this;
+  static from(raw: MatrixLike): Matrix {
+    return new Matrix(raw.length, raw[0].length).copy(raw);
   }
 
-  public sub(arg: Matrix | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) this[i].sub(arg);
-    } else {
-      for (let i = 0; i < this.length; i++) this[i].sub(arg[i]);
-    }
-
-    return this;
+  static zeros(rows: number, cols: number): Matrix {
+    return new Matrix(rows, cols);
   }
 
-  public mul(arg: Matrix | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) this[i].mul(arg);
-    } else {
-      for (let i = 0; i < this.length; i++) this[i].mul(arg[i]);
-    }
-
-    return this;
+  static ones(rows: number, cols: number): Matrix {
+    return Matrix.values(rows, cols, 1);
   }
 
-  public div(arg: Matrix | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) this[i].div(arg);
-    } else {
-      for (let i = 0; i < this.length; i++) this[i].div(arg[i]);
-    }
-
-    return this;
+  static values(rows: number, cols: number, value: number): Matrix {
+    return new Matrix(rows, cols).all(value);
   }
 
-  public rand(min = -0.1, max = 0.1): this {
-    for (let i = 0; i < this.length; i++) this[i].rand(min, max);
-    return this;
+  static rand(rows: number, cols: number, min = -0.1, max = 0.1): Matrix {
+    return new Matrix(rows, cols).rand(min, max);
   }
 
-  public copy(): Matrix {
-    return Matrix.from(this);
-  }
-
-  public dot(arg: Matrix): Matrix {
-    return Matrix.dot(this, arg);
-  }
-
-  public convolve(kernel: Matrix): Matrix {
-    return Matrix.convolve(this, kernel);
-  }
-
-  ///// ///// ///// ///// /////
-
-  public static from(raw: MatrixLike): Matrix {
-    const rows = raw.length;
-    const cols = raw[0].length;
-    const out = new Matrix(rows, cols);
-
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        out[i][j] = raw[i][j];
-      }
-    }
-
-    return out;
-  }
-
-  public static createRow(raw: VectorLike): Matrix {
-    const out = new Matrix(1, raw.length);
-    for (let i = 0; i < raw.length; i++) {
-      out[0][i] = raw[i];
-    }
-    return out;
-  }
-
-  public static createColumn(raw: VectorLike): Matrix {
-    const out = new Matrix(raw.length, 1);
-    for (let i = 0; i < raw.length; i++) {
-      out[i][0] = raw[i];
-    }
-    return out;
-  }
-
-  public static dot(a: MatrixLike, b: MatrixLike): Matrix {
-    if (a[0].length !== b.length) {
-      throw new Error("Matrix dimensions do not match");
-    }
-
+  static dot(a: MatrixLike, b: MatrixLike): Matrix {
     const out = new Matrix(a.length, b[0].length);
 
     for (let i = 0; i < a.length; i++) {
       for (let j = 0; j < b[0].length; j++) {
-        out[i][j] = 0;
         for (let k = 0; k < a[0].length; k++) {
-          out[i][j] += (a[i][k] * b[k][j]) || 0;
+          out[i][j] += a[i][k] * b[k][j];
         }
       }
     }
 
     return out;
-  }
-
-  public static convolve(m: MatrixLike, kernel: MatrixLike): Matrix {
-    const padh = Math.floor(kernel.length / 2);
-    const padw = Math.floor(kernel[0].length / 2);
-    const mrows = m.length;
-    const mcols = m[0].length;
-    const krows = kernel.length;
-    const kcols = kernel[0].length;
-
-    const out = new Matrix(m.length, m[0].length);
-
-    for (let i = 0; i < mrows; i++) {
-      for (let j = 0; j < mcols; j++) {
-        for (let k = 0; k < krows; k++) {
-          for (let l = 0; l < kcols; l++) {
-            const x = i + k - padh;
-            const y = j + l - padw;
-            if (x >= 0 && x < mrows && y >= 0 && y < mcols) {
-              out[i][j] += (m[x][y] * kernel[k][l]) || 0;
-            }
-          }
-        }
-      }
-    }
-
-    return out;
-  }
-
-  public static values(rows: number, cols: number, value: Scalar): Matrix {
-    const out = new Matrix(rows, cols);
-    for (let i = 0; i < rows; i++) {
-      out[i].fill(value);
-    }
-    return out;
-  }
-
-  public static zeros(rows: number, cols: number): Matrix {
-    return new Matrix(rows, cols);
-  }
-
-  public static ones(rows: number, cols: number): Matrix {
-    return Matrix.values(rows, cols, 1);
-  }
-
-  public static rand(
-    rows: number,
-    cols: number,
-    min = -0.1,
-    max = 0.1,
-  ): Matrix {
-    return new Matrix(rows, cols).rand(min, max);
   }
 }

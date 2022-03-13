@@ -1,102 +1,111 @@
-import { NDArray, Scalar } from "./ndarray.ts";
-import { Matrix } from "./matrix.ts";
+import { Scalar, VectorLike } from "./types.ts";
+import { NDArray } from "./ndarray.ts";
 
-export type VectorLike = Scalar[] | Vector;
-
-export class Vector extends NDArray<Vector, Scalar> {
+export class Vector extends Array<Scalar> implements NDArray {
   constructor(size: number) {
     super(size);
-    this.fill(0);
   }
 
-  public get shape(): number[] {
+  get shape(): number[] {
     return [this.length];
   }
 
-  public add(arg: Vector | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) this[i] += arg || 0;
+  add(other: VectorLike | Vector | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.length; i++) this[i] += other[i] || 0;
     } else {
-      for (let i = 0; i < this.length; i++) this[i] += arg[i] || 0;
+      for (let i = 0; i < this.length; i++) this[i] += other || 0;
     }
+
     return this;
   }
 
-  public sub(arg: Vector | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) this[i] -= arg || 0;
+  sub(other: VectorLike | Vector | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.length; i++) this[i] -= other[i] || 0;
     } else {
-      for (let i = 0; i < this.length; i++) this[i] -= arg[i] || 0;
+      for (let i = 0; i < this.length; i++) this[i] -= other || 0;
     }
+
     return this;
   }
 
-  public mul(arg: Vector | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) this[i] *= arg || 0;
+  mul(other: VectorLike | Vector | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.length; i++) this[i] *= other[i] || 0;
     } else {
-      for (let i = 0; i < this.length; i++) this[i] *= arg[i] || 0;
+      for (let i = 0; i < this.length; i++) this[i] *= other || 0;
     }
+
     return this;
   }
 
-  public div(arg: Vector | Scalar): this {
-    if (typeof arg === "number") {
-      for (let i = 0; i < this.length; i++) this[i] /= arg || 0;
+  div(other: VectorLike | Vector | Scalar): this {
+    if (other instanceof Array) {
+      for (let i = 0; i < this.length; i++) {
+        this[i] /= other[i] || Number.EPSILON;
+      }
     } else {
-      for (let i = 0; i < this.length; i++) this[i] /= arg[i] || 0;
+      for (let i = 0; i < this.length; i++) this[i] /= other || Number.EPSILON;
     }
+
     return this;
   }
 
-  public rand(min = -0.1, max = 0.1): this {
+  clone(): Vector {
+    const out = new Vector(this.length);
+    for (let i = 0; i < this.length; i++) out[i] = this[i];
+    return out;
+  }
+
+  copy(other: VectorLike | Vector): this {
+    for (let i = 0; i < this.length; i++) this[i] = other[i];
+    return this;
+  }
+
+  rand(min = -0.1, max = 0.1): this {
     for (let i = 0; i < this.length; i++) {
       this[i] = Math.random() * (max - min) + min;
     }
     return this;
   }
 
-  public copy(): Vector {
-    return Vector.from(this);
+  all(value: Scalar): this {
+    for (let i = 0; i < this.length; i++) this[i] = value;
+    return this;
   }
 
-  public dot(arg: Vector): Scalar {
-    let out = 0;
-    for (let i = 0; i < this.length; i++) out += this[i] * arg[i];
-    return out;
+  dot(other: VectorLike): Scalar {
+    return Vector.dot(this, other);
   }
 
-  public toRowMatrix(): Matrix {
-    return Matrix.createRow(this);
-  }
+  ////////////////////////////////////////////////////////////////////////////////
 
-  public toColumnMatrix(): Matrix {
-    return Matrix.createColumn(this);
-  }
-
-  ///// ///// ///// ///// /////
-
-  public static from(raw: VectorLike): Vector {
-    const out = new Vector(raw.length);
-    for (let i = 0; i < raw.length; i++) out[i] = raw[i];
-    return out;
-  }
-
-  public static zeros(size: number): Vector {
+  static zeros(size: number) {
     return new Vector(size);
   }
 
-  public static ones(size: number): Vector {
+  static ones(size: number) {
     return Vector.values(size, 1);
   }
 
-  public static values(size: number, value: Scalar): Vector {
-    return new Vector(size).fill(value);
+  static values(size: number, value: Scalar) {
+    return new Vector(size).all(value);
   }
 
-  public static rand(size: number, min = -0.1, max = 0.1): Vector {
-    const out = new Vector(size);
-    out.rand(min, max);
+  static rand(size: number, min = -0.1, max = 0.1) {
+    return new Vector(size).rand(min, max);
+  }
+
+  static from(raw: VectorLike | Vector): Vector {
+    return new Vector(raw.length).copy(raw);
+  }
+
+  static dot(a: VectorLike, b: VectorLike): Scalar {
+    let out = 0;
+    for (let i = 0; i < a.length; i++) {
+      out += a[i] * b[i];
+    }
     return out;
   }
 }
