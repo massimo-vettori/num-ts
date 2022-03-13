@@ -1,17 +1,17 @@
-import { NDArrayLike, Scalar } from './types.ts';
+import { NDArrayLike, Scalar } from "./types.ts";
 
 export interface NDArray {
   get shape(): number[];
 
-  add(other: NDArrayLike|NDArray|Scalar): this;
-  sub(other: NDArrayLike|NDArray|Scalar): this;
-  mul(other: NDArrayLike|NDArray|Scalar): this;
-  div(other: NDArrayLike|NDArray|Scalar): this;
+  add(other: NDArrayLike | NDArray | Scalar): this;
+  sub(other: NDArrayLike | NDArray | Scalar): this;
+  mul(other: NDArrayLike | NDArray | Scalar): this;
+  div(other: NDArrayLike | NDArray | Scalar): this;
 
-  dot?(other: NDArrayLike|NDArray): NDArray|Scalar;
+  dot?(other: NDArrayLike | NDArray): NDArray | Scalar;
   transpose?(): NDArray;
   reshape?(shape: number[]): NDArray;
-  convolve?(kernel: NDArrayLike|NDArray): NDArray;
+  convolve?(kernel: NDArrayLike | NDArray): NDArray;
 
   clone(): NDArray;
   rand(min: Scalar, max: Scalar): this;
