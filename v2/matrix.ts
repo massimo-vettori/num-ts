@@ -20,7 +20,7 @@ export class Matrix extends Array<Vector> implements NDArray {
     for (let i = 0; i < rows; i++) this[i] = new Vector(cols);
   }
 
-  add(other: MatrixLike | Matrix | Scalar): this {
+  add(other: MatrixLike | Scalar): this {
     if (other instanceof Array) {
       for (let i = 0; i < this.rows; i++) this[i].add(other[i]);
     } else {
@@ -30,7 +30,7 @@ export class Matrix extends Array<Vector> implements NDArray {
     return this;
   }
 
-  sub(other: MatrixLike | Matrix | Scalar): this {
+  sub(other: MatrixLike | Scalar): this {
     if (other instanceof Array) {
       for (let i = 0; i < this.rows; i++) this[i].sub(other[i]);
     } else {
@@ -40,7 +40,7 @@ export class Matrix extends Array<Vector> implements NDArray {
     return this;
   }
 
-  mul(other: MatrixLike | Matrix | Scalar): this {
+  mul(other: MatrixLike | Scalar): this {
     if (other instanceof Array) {
       for (let i = 0; i < this.rows; i++) this[i].mul(other[i]);
     } else {
@@ -50,7 +50,7 @@ export class Matrix extends Array<Vector> implements NDArray {
     return this;
   }
 
-  div(other: MatrixLike | Matrix | Scalar): this {
+  div(other: MatrixLike | Scalar): this {
     if (other instanceof Array) {
       for (let i = 0; i < this.rows; i++) this[i].div(other[i]);
     } else {
@@ -66,7 +66,7 @@ export class Matrix extends Array<Vector> implements NDArray {
     return out;
   }
 
-  copy(other: MatrixLike | Matrix): this {
+  copy(other: MatrixLike): this {
     for (let i = 0; i < this.rows; i++) this[i].copy(other[i]);
     return this;
   }
@@ -91,23 +91,11 @@ export class Matrix extends Array<Vector> implements NDArray {
     return out;
   }
 
-  dot(other: MatrixLike | Matrix): Matrix {
-    const out = new Matrix(this.rows, other[0].length);
-
-    for (let i = 0; i < this.rows; i++) {
-      for (let j = 0; j < other[0].length; j++) {
-        let sum = 0;
-        for (let k = 0; k < this.cols; k++) {
-          sum += this[i][k] * (other[k][j] || 0);
-        }
-        out[i][j] = sum;
-      }
-    }
-
-    return out;
+  dot(other: MatrixLike): Matrix {
+    return Matrix.dot(this, other);
   }
 
-  convolve(kernel: MatrixLike | Matrix): Matrix {
+  convolve(kernel: MatrixLike): Matrix {
     const out = new Matrix(this.rows, this.cols);
 
     const kr = kernel.length;
@@ -140,7 +128,7 @@ export class Matrix extends Array<Vector> implements NDArray {
 
   ///////////////////////////////////////////////////////////////////
 
-  static from(raw: MatrixLike | Matrix): Matrix {
+  static from(raw: MatrixLike): Matrix {
     return new Matrix(raw.length, raw[0].length).copy(raw);
   }
 
@@ -158,5 +146,19 @@ export class Matrix extends Array<Vector> implements NDArray {
 
   static rand(rows: number, cols: number, min = -0.1, max = 0.1): Matrix {
     return new Matrix(rows, cols).rand(min, max);
+  }
+
+  static dot(a: MatrixLike, b: MatrixLike): Matrix {
+    const out = new Matrix(a.length, b[0].length);
+
+    for (let i = 0; i < a.length; i++) {
+      for (let j = 0; j < b[0].length; j++) {
+        for (let k = 0; k < a[0].length; k++) {
+          out[i][j] += a[i][k] * b[k][j];
+        }
+      }
+    }
+
+    return out;
   }
 }

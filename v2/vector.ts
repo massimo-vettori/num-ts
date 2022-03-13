@@ -75,12 +75,8 @@ export class Vector extends Array<Scalar> implements NDArray {
     return this;
   }
 
-  dot(other: VectorLike | Vector): Scalar {
-    let out = 0;
-    for (let i = 0; i < this.length; i++) {
-      out += this[i] * (other[i] || 0);
-    }
-    return out;
+  dot(other: VectorLike): Scalar {
+    return Vector.dot(this, other);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -103,5 +99,13 @@ export class Vector extends Array<Scalar> implements NDArray {
 
   static from(raw: VectorLike | Vector): Vector {
     return new Vector(raw.length).copy(raw);
+  }
+
+  static dot(a: VectorLike, b: VectorLike): Scalar {
+    let out = 0;
+    for (let i = 0; i < a.length; i++) {
+      out += a[i] * b[i];
+    }
+    return out;
   }
 }
